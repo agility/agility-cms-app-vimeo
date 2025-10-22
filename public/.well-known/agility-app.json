@@ -1,0 +1,30 @@
+{
+	"name": "Vimeo App",
+	"documentationLink": "https://github.com/agility/agility-cms-app-vimeo",
+	"description": "A Vimeo app for Agility CMS.",
+	"version": "1.0.0",
+	"__sdkVersion": "2.0.0",
+	"configValues": [
+		{
+			"label": "Config Value 1",
+			"name": "configValue1",
+			"type": "string"
+		}
+	],
+	"capabilities": {
+		"fields": [
+			{
+				"name": "vimeo-field",
+				"label": "Vimeo Field",
+				"description": "A field that allows the user to embed a Vimeo video in a content item."
+			}
+		],
+		"modals": [
+			{
+				"name": "example-modal",
+				"label": "Example Modal Dialog",
+				"description": "An example modal dialog that can be invoked from the other capabilities of this app."
+			}
+		]
+	}
+}
