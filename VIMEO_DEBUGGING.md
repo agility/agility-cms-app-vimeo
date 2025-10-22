@@ -91,17 +91,20 @@ Make sure:
 ### 8. Permissions Policy Issues
 
 If you see permissions policy violations in the console like:
-- `[Violation] Potential permissions policy violation: autoplay is not allowed`
-- `[Violation] Potential permissions policy violation: encrypted-media is not allowed`
-- `[Violation] Potential permissions policy violation: fullscreen is not allowed`
+
+-   `[Violation] Potential permissions policy violation: autoplay is not allowed`
+-   `[Violation] Potential permissions policy violation: encrypted-media is not allowed`
+-   `[Violation] Potential permissions policy violation: fullscreen is not allowed`
 
 These have been resolved by adding the proper Permissions Policy headers in:
-- `app/layout.tsx` (metadata configuration)
-- `next.config.js` (global headers)
+
+-   `app/layout.tsx` (metadata configuration)
+-   `next.config.js` (global headers)
 
 The following permissions are enabled:
-- `autoplay=*` - Allows video autoplay
-- `encrypted-media=*` - Allows DRM content
-- `fullscreen=*` - Allows fullscreen video
-- `clipboard-write=*` - Allows copying video URLs
-- `web-share=*` - Allows sharing functionality
+
+-   `autoplay=*` - Allows video autoplay
+-   `encrypted-media=*` - Allows DRM content
+-   `fullscreen=*` - Allows fullscreen video
+-   `clipboard-write=*` - Allows copying video URLs
+-   `web-share=*` - Allows sharing functionality
