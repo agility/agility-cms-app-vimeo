@@ -2,7 +2,6 @@
 
 import { useAgilityAppSDK, contentItemMethods, useResizeHeight } from "@agility/app-sdk"
 import { useState, useEffect, useRef } from "react"
-import Player, { VimeoEmbedParameters } from "@vimeo/player"
 
 interface VimeoVideoData {
 	url: string
@@ -28,8 +27,6 @@ export default function VimeoField() {
 	const [videoData, setVideoData] = useState<VimeoVideoData | null>(null)
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState("")
-	const playerRef = useRef<HTMLDivElement>(null)
-	const vimeoPlayerRef = useRef<Player | null>(null)
 
 	// Initialize from existing field value
 	useEffect(() => {
@@ -46,99 +43,7 @@ export default function VimeoField() {
 		}
 	}, [fieldValue])
 
-	// Initialize Vimeo player when video data changes
-	useEffect(() => {
-		if (videoData && playerRef.current) {
-			console.log("Initializing Vimeo player for video:", videoData.video_id);
 
-			// Clean up existing player
-			if (vimeoPlayerRef.current) {
-				console.log("Destroying existing player");
-				try {
-					vimeoPlayerRef.current.destroy()
-				} catch (e) {
-					console.warn("Error destroying existing player:", e)
-				}
-				vimeoPlayerRef.current = null
-			}
-
-			// Add a small delay to ensure DOM is ready
-			const timer = setTimeout(() => {
-				if (playerRef.current && videoData) {
-					try {
-						console.log("Creating new Vimeo player");
-
-						// Try using the video ID first (most reliable approach)
-						const playerOptions: VimeoEmbedParameters = {
-							id: videoData.video_id,
-							width: 400,
-							height: 225,
-							responsive: true,
-							autoplay: false,
-							byline: false,
-							portrait: false,
-							title: false,
-							fullscreen: false
-						}
-						console.log("setting player options:", playerOptions);
-						vimeoPlayerRef.current = new Player(playerRef.current, playerOptions)
-
-						// Add event listeners to verify player is working
-						vimeoPlayerRef.current.ready().then(() => {
-							console.log("Vimeo player is ready");
-							// Clear any previous errors since player loaded successfully
-							setError("")
-						}).catch((error) => {
-							console.error("Vimeo player ready error:", error);
-							setError('Unable to load video player. The video may be private or restricted.')
-						})
-
-						vimeoPlayerRef.current.on('play', () => {
-							console.log('Video started playing');
-						})
-
-						vimeoPlayerRef.current.on('error', (error) => {
-							console.error('Vimeo player error:', error);
-						})
-
-					} catch (e) {
-						console.error('Failed to initialize Vimeo player:', e)
-						let errorMessage = 'Failed to load video player'
-
-						if (e instanceof Error) {
-							// Check for specific Vimeo player errors
-							if (e.message.includes('privacy')) {
-								errorMessage = 'This video is private and cannot be embedded'
-							} else if (e.message.includes('not found') || e.message.includes('404')) {
-								errorMessage = 'Video not found. Please check the URL'
-							} else if (e.message.includes('domain')) {
-								errorMessage = 'This video cannot be embedded on this domain'
-							} else {
-								errorMessage = `Player error: ${e.message}`
-							}
-						}
-
-						setError(errorMessage)
-					}
-				}
-			}, 100)
-
-			return () => {
-				clearTimeout(timer)
-			}
-		}
-
-		return () => {
-			if (vimeoPlayerRef.current) {
-				try {
-					vimeoPlayerRef.current.destroy()
-				} catch (e) {
-					console.warn("Error during cleanup:", e)
-				}
-				vimeoPlayerRef.current = null
-			}
-		}
-	}, [videoData])
 
 	const extractVimeoId = (url: string): string | null => {
 		const regex = /(?:vimeo\.com\/(?:.*#|.*\/videos\/)?|player\.vimeo\.com\/video\/)(\d+)/
@@ -164,6 +69,9 @@ export default function VimeoField() {
 			}
 
 			const data = await response.json()
+
+			console.log("Fetched video data:", data);
+
 			const videoData: VimeoVideoData = {
 				...data,
 				url: url,
@@ -190,40 +98,15 @@ export default function VimeoField() {
 		setVideoData(null)
 		setInputUrl("")
 		contentItemMethods.setFieldValue({ value: "" })
-		if (vimeoPlayerRef.current) {
-			vimeoPlayerRef.current.destroy()
-			vimeoPlayerRef.current = null
-		}
+
 	}
 
 	if (initializing) return null
 
 	return (
-		<div ref={containerRef} className="p-4 min-h-[400px]">
-			<div className="space-y-4">
-				{/* URL Input Form */}
-				<form onSubmit={handleUrlSubmit} className="space-y-2">
-					<label className="block text-sm font-medium text-gray-700">
-						Vimeo Video URL
-					</label>
-					<div className="flex gap-2">
-						<input
-							type="url"
-							value={inputUrl}
-							onChange={(e) => setInputUrl(e.target.value)}
-							placeholder="https://vimeo.com/123456789"
-							className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-							disabled={loading}
-						/>
-						<button
-							type="submit"
-							disabled={loading || !inputUrl.trim()}
-							className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{loading ? "Loading..." : "Fetch"}
-						</button>
-					</div>
-				</form>
+		<div ref={containerRef} className="min-h-[200px]">
+			<div className="space-y-4 ">
+
 
 				{/* Error Message */}
 				{error && (
@@ -238,19 +121,13 @@ export default function VimeoField() {
 						{/* Responsive container: side-by-side on >=600px, stacked on <600px */}
 						<div className="flex flex-col sm:flex-row">
 							{/* Video Player */}
-							<div className="sm:w-1/2 sm:min-w-[400px]">
-								<div
-									ref={playerRef}
-									className="w-full bg-black min-h-[300px] sm:min-h-[225px] flex items-center justify-center"
-									style={{ minHeight: '225px' }}
-								>
-									{/* Fallback content while player loads */}
-									<div className="text-white text-sm">Loading player...</div>
-								</div>
+							<div className="sm:w-1/2 w-full min-h-[200px]">
+								<div className="video-container relative h-full min-h-[200px]" dangerouslySetInnerHTML={{ __html: videoData.html }}></div>
+
 							</div>
 
 							{/* Video Details */}
-							<div className="sm:w-1/2 p-4 bg-gray-50">
+							<div className="sm:w-1/2 p-4 ">
 								<div className="flex justify-between items-start mb-3">
 									<h3 className="text-lg font-semibold text-gray-900">
 										{videoData.title}
@@ -312,16 +189,43 @@ export default function VimeoField() {
 
 				{/* Empty State */}
 				{!videoData && !loading && (
-					<div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-						<div className="text-gray-500">
-							<svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-							</svg>
-							<p className="mt-2 text-sm">Enter a Vimeo URL to preview the video</p>
+					<>
+						{/* URL Input Form */}
+						<form onSubmit={handleUrlSubmit} className="space-y-2 text-sm p-1">
+							<label className="block text-sm font-medium text-gray-700">
+								Vimeo Video URL
+							</label>
+							<div className="flex gap-2">
+								<input
+									type="url"
+									value={inputUrl}
+									onChange={(e) => setInputUrl(e.target.value)}
+									placeholder="https://vimeo.com/123456789"
+									className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600 focus:border-transparent"
+									disabled={loading}
+								/>
+								<button
+									type="submit"
+									disabled={loading || !inputUrl.trim()}
+									className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+								>
+									{loading ? "Loading..." : "Fetch"}
+								</button>
+							</div>
+						</form>
+						<div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+
+
+
+							<div className="text-gray-500">
+
+								<img src="/logo-black-vimeo.svg" alt="Vimeo Logo" className="mx-auto h-10  text-gray-400" />
+								<p className="mt-2 text-sm">Enter a Vimeo URL to preview the video</p>
+							</div>
 						</div>
-					</div>
+					</>
 				)}
 			</div>
-		</div>
+		</div >
 	)
 }

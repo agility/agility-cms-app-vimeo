@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
 	title: 'Example App',
 	description: 'An example app showing the capabilities of the Agility App SDK v2',
+	other: {
+		'Permissions-Policy': 'autoplay=*, encrypted-media=*, fullscreen=*, clipboard-write=*, web-share=*'
+	}
 }
 
 export default function RootLayout({

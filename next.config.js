@@ -13,6 +13,15 @@ const nextConfig = {
             value: '*',
           },
         ],
+      },
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'autoplay=*, encrypted-media=*, fullscreen=*, clipboard-write=*, web-share=*'
+          },
+        ],
       }
     ]
   },
