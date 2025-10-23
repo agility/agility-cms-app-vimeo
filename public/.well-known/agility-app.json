@@ -1,6 +1,6 @@
 {
 	"name": "Vimeo App",
-	"documentationLink": "https://github.com/agility/agility-cms-app-vimeo",
+	"documentationLink": "https://agilitycms-documentation-site.vercel.app/docs/apps/vimeo",
 	"description": "A Vimeo app for Agility CMS.",
 	"version": "1.0.0",
 	"__sdkVersion": "2.0.0",
